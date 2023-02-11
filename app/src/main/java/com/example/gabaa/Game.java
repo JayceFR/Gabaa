@@ -3,6 +3,7 @@ package com.example.gabaa;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -11,15 +12,34 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 // Game Manages all the objects in the game and is repsonsible for updating all states and render all
 public class Game extends SurfaceView implements SurfaceHolder.Callback {
+    private final Player player;
     private GameLoop gameLoop;
     private Context context;
-    public Game(Context context) {
+    public int display_height = 0;
+    public int display_width = 0;
+    public Game(Context context, int height, int width) {
         super(context);
         SurfaceHolder surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
         this.context = context;
+        display_height = height;
+        display_width = width;
         gameLoop = new GameLoop(this, surfaceHolder);
+        player = new Player(getContext(), display_width/2, display_height - 80, 30);
         setFocusable(true);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                player.setPosition((double)event.getX(), (double)event.getY());
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                player.setPosition((double)event.getX(), (double)event.getY());
+                return true;
+        }
+        return super.onTouchEvent(event);
     }
 
     @Override
@@ -42,6 +62,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         super.draw(canvas);
         drawUps(canvas);
         drawFPS(canvas);
+        player.draw(canvas);
     }
 
     public void drawUps(Canvas canvas){
@@ -64,5 +85,6 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
 
     public void update() {
         //Updating the game
+        player.update();
     }
 }
