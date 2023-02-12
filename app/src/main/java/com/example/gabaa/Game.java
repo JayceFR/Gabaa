@@ -98,6 +98,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         player.draw(canvas);
         enemy.draw(canvas);
         joystick.draw(canvas);
+        map.draw(canvas, display_height, display_width);
         for (int i = 0; i < waves.size(); i++){
             waves.get(i).update(canvas, player.get_x(), player.get_y());
             if (!waves.get(i).are_u_alive()){
@@ -117,6 +118,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         paint.setTextSize(50);
         canvas.drawText("Ups" + averageUps, 100, 100, paint);
         canvas.drawText("game_time" + new Long(game_time).toString(), 100, 400, paint);
+        canvas.drawText(map.get_array(), 100, 600, paint);
         canvas.drawText(new Integer(display_height).toString() + " " + new Integer(display_width).toString(), 100, 500, paint );
     }
 
