@@ -24,16 +24,20 @@ public class Map {
         tile1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile1, bitmap_options);
         mymap = new char[][]{{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}, {'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}, {'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}, {'1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'}, {'1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'}};
     }
-    public void draw(Canvas canvas, int height, int width) {
-        int x = 0;
+    public ArrayList<tile_rects> draw(Canvas canvas, int height, int width) {
+        ArrayList<tile_rects> tiles = new ArrayList<tile_rects>();
         y = (int) height  - (mymap.length * 64);
         for(int row = 0; row < mymap.length; row++){
             for(int element = 0; element<mymap[row].length; element++){
                 if (mymap[row][element] == '1'){
                     canvas.drawBitmap(tile1, element * 64, y + (row * 64), null);
                 }
+                if (mymap[row][element] != '0'){
+                    tiles.add(new tile_rects(element * 64, y + (row * 64)));
+                }
             }
         }
+        return tiles;
 
     }
     public String get_array(){

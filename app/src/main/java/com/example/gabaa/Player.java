@@ -6,6 +6,8 @@ import android.graphics.Paint;
 
 import androidx.core.content.ContextCompat;
 
+import java.util.ArrayList;
+
 public class Player {
 
     private double positionX;
@@ -32,11 +34,25 @@ public class Player {
         canvas.drawCircle( (float)positionX, (float)positionY, (float)radius, paint);
     }
 
-    public void update(Joystick joystick) {
+    public void update(Joystick joystick, ArrayList<tile_rects> tiles) {
         velocityX = joystick.getActuatorX()*max_speed;
         velocityY = joystick.getActuatorY()*max_speed;
         positionX += velocityX;
         positionY += velocityY;
+
+    }
+
+    public String collision_test(ArrayList<tile_rects> tiles){
+        float distance_between = 0.0f;
+        ArrayList<tile_rects> hitlist = new ArrayList<tile_rects>();
+        for(tile_rects tile : tiles){
+            distance_between = (float) Math.sqrt(Math.pow((tile.get_x() - positionX), 2) + Math.pow((tile.get_y() - positionY), 2));
+            if (distance_between < 30.0f){
+                //Colliding
+                hitlist.add(tile);
+            }
+        }
+        return  hitlist.toString();
     }
 
     public void setPosition(double x, double y) {
