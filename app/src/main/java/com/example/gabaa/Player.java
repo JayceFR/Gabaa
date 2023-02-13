@@ -16,6 +16,7 @@ public class Player {
     public Paint paint;
     public int display_height = 0;
     private double velocityX;
+    public boolean colliding = false;
     private double velocityY;
     private double max_speed = 10.0d;
 
@@ -38,17 +39,24 @@ public class Player {
         velocityX = joystick.getActuatorX()*max_speed;
         velocityY = joystick.getActuatorY()*max_speed;
         positionX += velocityX;
-        positionY += velocityY;
+        if (!colliding){
+            positionY += velocityY;
+            positionY += 9.8;
+        }
+
 
     }
 
     public String collision_test(ArrayList<tile_rects> tiles){
         float distance_between = 0.0f;
         ArrayList<tile_rects> hitlist = new ArrayList<tile_rects>();
+        //colliding = false;
         for(tile_rects tile : tiles){
             distance_between = (float) Math.sqrt(Math.pow((tile.get_x() - positionX), 2) + Math.pow((tile.get_y() - positionY), 2));
             if (distance_between < 30.0f){
-                //Colliding
+                //Colliding up
+                positionY = tile.get_y() - 30.0f;
+                colliding = true;
                 hitlist.add(tile);
             }
         }

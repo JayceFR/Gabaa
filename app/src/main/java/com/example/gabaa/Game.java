@@ -40,7 +40,8 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         display_width = width;
         gameLoop = new GameLoop(this, surfaceHolder);
         joystick = new Joystick(275,700,70,40);
-        player = new Player(getContext(), display_width/2, display_height - 80, 30);
+        //player = new Player(getContext(), display_width/2, display_height - 80, 30);
+        player = new Player(getContext(), 100, 200, 30);
         map = new Map(getContext());
         enemy = new Enemy(getContext(), 200,250, true, 6.0f);
         //enemies.add(new Enemy(getContext(), 200.0f,550.0f, true, 6.0f));
