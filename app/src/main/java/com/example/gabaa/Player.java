@@ -19,6 +19,7 @@ public class Player {
     public boolean colliding = false;
     private double velocityY;
     private double max_speed = 10.0d;
+    private double[] movement;
 
     public Player(Context context, double positionX, double positionY, double radius){
         this.positionX = positionX;
@@ -36,31 +37,65 @@ public class Player {
     }
 
     public void update(Joystick joystick, ArrayList<tile_rects> tiles) {
+        this.movement = new double[]{0.0d, 0.0d};
         velocityX = joystick.getActuatorX()*max_speed;
         velocityY = joystick.getActuatorY()*max_speed;
-        positionX += velocityX;
-        if (!colliding){
-            positionY += velocityY;
-            positionY += 9.8;
+        movement[0] += velocityX;
+
+        movement[1] += 9.81d;
+
+
+        /*positionX += velocityX;
+        positionY += velocityY;
+        positionY += 9.8;*/
+
+        if (tiles!=null){
+            collision_checker(tiles);
+            //this.collision_test(tiles);
         }
-
-
     }
 
-    public String collision_test(ArrayList<tile_rects> tiles){
+    public void collision_checker(ArrayList<tile_rects> tiles) {
+        positionX += movement[0];
+        ArrayList<tile_rects> hit_list = collision_test(tiles);
+        for(tile_rects tile : hit_list){
+            if (movement[0] > 0.0d) {
+                //Colliding right...
+                positionX = tile.get_x() - 30.0f;
+            }
+            if(movement[0] < 0.0d){
+                //Colliding left
+                positionX = tile.get_x() + 94.0f;
+            }
+        }
+        positionY += movement[1];
+        hit_list.clear();
+        hit_list = collision_test(tiles);
+        colliding = false;
+        for(tile_rects tile : hit_list){
+            if (movement[1] > 0.0d){
+                //Colliding down
+                double to_add = 30 - (tile.get_y() - positionY);
+                colliding = true;
+                positionY -= to_add;
+            }
+            if (movement[1] < 0.0d) {
+                //Colliding up
+                positionY = tile.get_y() + 94.0d;
+            }
+        }
+    }
+
+    public ArrayList<tile_rects> collision_test(ArrayList<tile_rects> tiles){
         float distance_between = 0.0f;
         ArrayList<tile_rects> hitlist = new ArrayList<tile_rects>();
-        //colliding = false;
         for(tile_rects tile : tiles){
-            distance_between = (float) Math.sqrt(Math.pow((tile.get_x() - positionX), 2) + Math.pow((tile.get_y() - positionY), 2));
-            if (distance_between < 30.0f){
-                //Colliding up
-                positionY = tile.get_y() - 30.0f;
-                colliding = true;
+            distance_between = (float) Math.sqrt(Math.pow((tile.get_x() - positionX + 32), 2) + Math.pow((tile.get_y() - positionY + 32), 2));
+            if (distance_between < 62){
                 hitlist.add(tile);
             }
         }
-        return  hitlist.toString();
+        return  hitlist;
     }
 
     public void setPosition(double x, double y) {

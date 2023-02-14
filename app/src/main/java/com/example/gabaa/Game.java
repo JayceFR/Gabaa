@@ -106,7 +106,8 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         int color = ContextCompat.getColor(context, R.color.purple_200);
         paint.setColor(color);
         paint.setTextSize(50);
-        canvas.drawText(player.collision_test(tiles), 100, 600, paint );
+        //canvas.drawText(player.collision_test(tiles), 100, 600, paint );
+
         for (int i = 0; i < waves.size(); i++){
             waves.get(i).update(canvas, player.get_x(), player.get_y());
             if (!waves.get(i).are_u_alive()){
@@ -141,6 +142,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     public void update() {
         //Updating the game running at 30fps
         player.update(joystick, tiles);
+
         enemy.update();
         joystick.update();
         game_time += 1;
