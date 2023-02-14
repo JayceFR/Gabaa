@@ -22,12 +22,12 @@ public class Enemy {
         int color = ContextCompat.getColor(context, R.color.enemy);
         paint.setColor(color);
     }
-    public void update(){
+    public void update(double dt){
         if(this.shooting_right){
-            spawn_pos[0] += speed;
+            spawn_pos[0] += speed * dt;
         }
         else{
-            spawn_pos[1] += speed;
+            spawn_pos[1] += speed * dt;
         }
     }
     public void draw(Canvas canvas){

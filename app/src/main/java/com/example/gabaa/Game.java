@@ -2,6 +2,7 @@ package com.example.gabaa;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -21,9 +22,12 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     private final Map map;
     private final Enemy enemy;
     private final Joystick joystick;
+    private final Joystick aim_joystick;
     private long wave_last_update;
     private long wave_cooldown;
     private long game_time;
+    private long last_time;
+    public double dt;
     private GameLoop gameLoop;
     private Context context;
     public int display_height = 0;
@@ -39,7 +43,8 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         display_height = height;
         display_width = width;
         gameLoop = new GameLoop(this, surfaceHolder);
-        joystick = new Joystick(275,700,70,40);
+        joystick = new Joystick(200,height - 300,90,50, Color.GRAY, Color.BLUE);
+        aim_joystick = new Joystick(width - 200, height - 300, 90, 50,Color.GRAY, Color.RED);
         //player = new Player(getContext(), display_width/2, display_height - 80, 30);
         player = new Player(getContext(), 100, 200, 30);
         map = new Map(getContext());
@@ -47,6 +52,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         //enemies.add(new Enemy(getContext(), 200.0f,550.0f, true, 6.0f));
         //wave = new Wave(getContext(), width, height, 0);
         game_time = 0;
+        last_time = System.currentTimeMillis();
         wave_cooldown = 200;
         wave_last_update = 0;
         setFocusable(true);
@@ -56,20 +62,39 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
-                if(joystick.isPressed((double)event.getX(), (double)event.getY())){
-                    joystick.setIsPressed(true);
+                if (event.getX() > (float)display_width/2){
+                    if(aim_joystick.isPressed((double)event.getX(), (double)event.getY())){
+                        aim_joystick.setIsPressed(true);
+                    }
                 }
+                if (event.getX() < (float)display_height/2){
+                    if(joystick.isPressed((double)event.getX(), (double)event.getY())){
+                        joystick.setIsPressed(true);
+                    }
+                }
+
                 //player.setPosition((double)event.getX(), (double)event.getY());
                 return true;
             case MotionEvent.ACTION_MOVE:
-                if(joystick.getIsPressed()){
-                    joystick.setActuator((double)event.getX(), (double)event.getY());
+                if (event.getX() > (float)display_width/2){
+                    if(aim_joystick.getIsPressed()){
+                        aim_joystick.setActuator((double)event.getX(), (double)event.getY());
+                    }
                 }
+                if (event.getX() < (float)display_width/2){
+                    if(joystick.getIsPressed()){
+                        joystick.setActuator((double)event.getX(), (double)event.getY());
+                    }
+                }
+
+
                 //player.setPosition((double)event.getX(), (double)event.getY());
                 return true;
             case MotionEvent.ACTION_UP:
                 joystick.setIsPressed(false);
                 joystick.resetActuator();
+                aim_joystick.setIsPressed(false);
+                aim_joystick.resetActuator();
                 return true;
         }
         return super.onTouchEvent(event);
@@ -100,8 +125,9 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         drawFPS(canvas);
         player.draw(canvas);
         enemy.draw(canvas);
-        joystick.draw(canvas);
         tiles = map.draw(canvas, display_height, display_width);
+        joystick.draw(canvas);
+        aim_joystick.draw(canvas);
         Paint paint = new Paint();
         int color = ContextCompat.getColor(context, R.color.purple_200);
         paint.setColor(color);
@@ -109,7 +135,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         //canvas.drawText(player.collision_test(tiles), 100, 600, paint );
 
         for (int i = 0; i < waves.size(); i++){
-            waves.get(i).update(canvas, player.get_x(), player.get_y());
+            waves.get(i).update(canvas, player.get_x(), player.get_y(), dt);
             if (!waves.get(i).are_u_alive()){
                 waves.remove(i);
                 i = i-1;
@@ -127,7 +153,7 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
         paint.setTextSize(50);
         canvas.drawText("Ups" + averageUps, 100, 100, paint);
         canvas.drawText("game_time" + new Long(game_time).toString(), 100, 400, paint);
-        canvas.drawText(new Integer(display_height).toString() + " " + new Integer(display_width).toString(), 100, 500, paint );
+        canvas.drawText(new Double(dt).toString() + " " + new Double(aim_joystick.getActuatorY()).toString(), 100, 500, paint );
     }
 
     public void drawFPS(Canvas canvas){
@@ -141,10 +167,16 @@ public class Game extends SurfaceView implements SurfaceHolder.Callback {
 
     public void update() {
         //Updating the game running at 30fps
-        player.update(joystick, tiles);
-
-        enemy.update();
+        dt = System.currentTimeMillis() - last_time;
+        dt /= 30;
+        last_time = System.currentTimeMillis();
+        if(aim_joystick.getIsPressed()){
+            dt = 0.2d;
+        }
+        player.update(joystick, tiles, aim_joystick, dt);
+        enemy.update(dt);
         joystick.update();
+        aim_joystick.update();
         game_time += 1;
         if(game_time - wave_last_update > wave_cooldown){
             //Create a wave

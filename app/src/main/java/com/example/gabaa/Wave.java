@@ -37,10 +37,10 @@ public class Wave {
         }
 
     }
-    public void update(Canvas canvas, float player_x, float player_y){
+    public void update(Canvas canvas, float player_x, float player_y, double dt){
         float distance_between = 0.0f;
         for(int i = 0; i<enemies.size();i++){
-            enemies.get(i).update();
+            enemies.get(i).update(dt);
             enemies.get(i).draw(canvas);
             if(to_destroy()){
                 alive = false;

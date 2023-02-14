@@ -18,36 +18,50 @@ public class Player {
     private double velocityX;
     public boolean colliding = false;
     private double velocityY;
-    private double max_speed = 10.0d;
+    private double max_speed = 20.0d;
+    public ArrayList<projectile> projectiles = new ArrayList<projectile>();
     private double[] movement;
 
     public Player(Context context, double positionX, double positionY, double radius){
         this.positionX = positionX;
         this.positionY = positionY;
         this.radius = radius;
-
-
         paint = new Paint();
         int color = ContextCompat.getColor(context, R.color.player);
         paint.setColor(color);
+        projectiles.clear();
     }
 
     public void draw(Canvas canvas) {
         canvas.drawCircle( (float)positionX, (float)positionY, (float)radius, paint);
+        //drawing projectiles
+        for(int i = 0; i<projectiles.size(); i++){
+            projectiles.get(i).draw(canvas);
+        }
     }
 
-    public void update(Joystick joystick, ArrayList<tile_rects> tiles) {
+    public void update(Joystick joystick, ArrayList<tile_rects> tiles, Joystick aim_joystick, double dt) {
         this.movement = new double[]{0.0d, 0.0d};
-        velocityX = joystick.getActuatorX()*max_speed;
-        velocityY = joystick.getActuatorY()*max_speed;
+        velocityX = joystick.getActuatorX()*max_speed *dt;
+        velocityY = joystick.getActuatorY()*max_speed *dt;
+        if (Math.abs(aim_joystick.getActuatorX())>0.8d || Math.abs(aim_joystick.getActuatorY()) > 0.8d){
+            if(projectiles.isEmpty()){
+                projectiles.add(new projectile(positionX, positionY, aim_joystick.getActuatorX(), aim_joystick.getActuatorY()));
+            }
+        }
         movement[0] += velocityX;
 
         movement[1] += 9.81d;
 
-
-        /*positionX += velocityX;
-        positionY += velocityY;
-        positionY += 9.8;*/
+        //Updating projectiles
+        if(!projectiles.isEmpty()){
+            for(int i = 0; i<projectiles.size(); i++){
+                if (!aim_joystick.getIsPressed()){
+                    projectiles.get(i).set_alive(true);
+                }
+                projectiles.get(i).update();
+            }
+        }
 
         if (tiles!=null){
             collision_checker(tiles);
